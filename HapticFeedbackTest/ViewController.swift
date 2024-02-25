@@ -70,7 +70,7 @@ class ViewController: UIViewController {
         return stackView
     }()
     
-    lazy var bottonStackView: UIStackView = {
+    lazy var bottomStackView: UIStackView = {
         let action = generateAction(type: .action)
         let button = generateButton(title: "Selection", action: action, backGroundColor: .systemGreen)
         
@@ -108,7 +108,7 @@ extension ViewController {
         device.beginGeneratingDeviceOrientationNotifications()
         
         view.addSubview(mainStackView)
-        setupStackView(with: [topStackView, midStackView, bottonStackView])
+        setupStackView(with: [topStackView, midStackView, bottomStackView])
         setupInfoButton()
         
     }
@@ -121,7 +121,8 @@ extension ViewController {
     @objc func didTapInfoButton() {
         let viewController = UIViewController()
         let label = UILabel()
-        label.text = "Sample Test"
+        label.numberOfLines = 0
+        label.text = "There are three classes to generate haptic feedback, those are: UIImpactFeedbackGenerator, UINotificationFeedbackGenerator, and UISelectionFeedbackGenerator, in order to use them, there are 4 steps to follow:\n\n1.-Instantiate the class\n2.-Prepare the generator\n3.-Triggering the generator\n4.-releasing the generator"
         label.font = .preferredFont(forTextStyle: .body)
         label.textAlignment = .center
         label.textColor = .black
