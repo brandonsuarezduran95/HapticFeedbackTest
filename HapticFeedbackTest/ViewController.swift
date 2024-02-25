@@ -16,6 +16,8 @@ class ViewController: UIViewController {
         case impactHeavy
         case impactMedium
         case impactLight
+        case impactRigid
+        case impactSoft
         
         case action
     }
@@ -26,7 +28,9 @@ class ViewController: UIViewController {
     
     lazy var topStackView: UIStackView = {
         let colors: [UIColor] = [.systemRed, .systemGreen, .systemOrange]
+        
         let actions: [UIAction] = [generateAction(type: .notificationError), generateAction(type: .notificationSuccess), generateAction(type: .notificationWarning)]
+        
         let buttons: [UIButton] = [
             generateButton(title: "Error", action: actions[0], backGroundColor: colors[0]),
             generateButton(title: "Success", action: actions[1], backGroundColor: colors[1]),
@@ -38,16 +42,28 @@ class ViewController: UIViewController {
     }()
     
     lazy var midStackView: UIStackView = {
+        
         let colors: [UIColor] = [
             .init(red: 197/255, green: 217/255, blue: 232/255, alpha: 1),
             .init(red: 140/255, green: 181/255, blue: 209/255, alpha: 1),
-            .init(red: 84/255, green: 129/255, blue: 191/255, alpha: 1)
+            .init(red: 84/255, green: 129/255, blue: 191/255, alpha: 1),
+            .systemGray5,
+            .systemGray2
         ]
-        let actions: [UIAction] = [generateAction(type: .impactLight), generateAction(type: .impactMedium), generateAction(type: .impactHeavy)]
+        
+        let actions: [UIAction] = [generateAction(type: .impactLight),
+                                   generateAction(type: .impactMedium),
+                                   generateAction(type: .impactHeavy),
+                                   generateAction(type: .impactSoft),
+                                   generateAction(type: .impactRigid)
+        ]
+        
         let buttons: [UIButton] = [
             generateButton(title: "Light", action: actions[0], backGroundColor: colors[0]),
             generateButton(title: "Medium", action: actions[1], backGroundColor: colors[1]),
-            generateButton(title: "Heavy", action: actions[2], backGroundColor: colors[2])
+            generateButton(title: "Heavy", action: actions[2], backGroundColor: colors[2]),
+            generateButton(title: "Soft", action: actions[3], backGroundColor: colors[3]),
+            generateButton(title: "Rigid", action: actions[4], backGroundColor: colors[4])
         ]
         
         let stackView = generateContainerStack(title: "Impact Feedback", buttons: buttons)
@@ -123,19 +139,13 @@ extension ViewController {
         viewController.view.backgroundColor = .systemGray6
         
         if let sheet = viewController.sheetPresentationController {
-            sheet.detents = [.custom(resolver: { context in
-                200
-            })]
+            sheet.detents = [.medium()]
             sheet.prefersGrabberVisible = true
             sheet.prefersPageSizing = true
         }
         
         let gesture = UISelectionFeedbackGenerator()
         gesture.selectionChanged()
-        
-        if viewController.isBeingDismissed {
-            gesture.selectionChanged()
-        }
         
         self.present(viewController, animated: true)
     }
@@ -182,13 +192,38 @@ extension ViewController {
         titleLabel.textAlignment = .center
         titleLabel.textColor = .black
         
-        let horizontalStack = UIStackView(arrangedSubviews: buttons)
-        horizontalStack.axis = .horizontal
-        horizontalStack.alignment = .center
-        horizontalStack.distribution = .equalCentering
-        horizontalStack.spacing = 10
+        var contentStack = UIStackView()
         
-        let stackView = UIStackView(arrangedSubviews: [titleLabel, horizontalStack])
+        if buttons.count <= 3 {
+            buttons.forEach { view in
+                contentStack.addArrangedSubview(view)
+            }
+            contentStack.axis = .horizontal
+            
+        } else if buttons.count > 3 {
+            
+            let topStack = UIStackView(arrangedSubviews: [buttons[0], buttons[1], buttons[2]])
+            topStack.axis = .horizontal
+            topStack.alignment = .center
+            topStack.distribution = .equalCentering
+            topStack.spacing = 10
+            
+            let bottomStack = UIStackView(arrangedSubviews: [buttons[3], buttons[4]])
+            bottomStack.axis = .horizontal
+            bottomStack.alignment = .center
+            bottomStack.distribution = .equalCentering
+            bottomStack.spacing = 10
+            
+            contentStack = UIStackView(arrangedSubviews: [topStack, bottomStack])
+            contentStack.axis = .vertical
+        }
+        
+        contentStack.alignment = .center
+        contentStack.distribution = .equalCentering
+        contentStack.spacing = 10
+        
+        
+        let stackView = UIStackView(arrangedSubviews: [titleLabel, contentStack])
         stackView.axis = .vertical
         stackView.alignment = .center
         stackView.distribution = .equalCentering
@@ -237,6 +272,19 @@ extension ViewController {
         case .impactLight:
             return UIAction { _ in
                 let generator = UIImpactFeedbackGenerator(style: .light)
+                generator.prepare()
+                generator.impactOccurred()
+            }
+        
+        case .impactRigid:
+            return UIAction { _ in
+                let generator = UIImpactFeedbackGenerator(style: .rigid)
+                generator.prepare()
+                generator.impactOccurred()
+            }
+        case .impactSoft:
+            return UIAction { _ in
+                let generator = UIImpactFeedbackGenerator(style: .soft)
                 generator.prepare()
                 generator.impactOccurred()
             }
